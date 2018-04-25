@@ -1,34 +1,33 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { DatePickerAndroid, TimePickerAndroid } from 'react-native';
-import moment from 'moment';
+import React from "react";
+import PropTypes from "prop-types";
+import { DatePickerAndroid, TimePickerAndroid } from "react-native";
 
-export default class CustomDatePickerAndroid extends PureComponent {
+export default class CustomDatePickerAndroid extends React.PureComponent {
   static propTypes = {
     date: PropTypes.instanceOf(Date),
-    mode: PropTypes.oneOf(['date', 'time', 'datetime']),
+    mode: PropTypes.oneOf(["date", "time", "datetime"]),
     onCancel: PropTypes.func.isRequired,
     onConfirm: PropTypes.func.isRequired,
     onHideAfterConfirm: PropTypes.func,
     is24Hour: PropTypes.bool,
     isVisible: PropTypes.bool,
-    datePickerModeAndroid: PropTypes.oneOf(['calendar', 'spinner', 'default']),
+    datePickerModeAndroid: PropTypes.oneOf(["calendar", "spinner", "default"]),
     minimumDate: PropTypes.instanceOf(Date),
-    maximumDate: PropTypes.instanceOf(Date),
+    maximumDate: PropTypes.instanceOf(Date)
   };
 
   static defaultProps = {
     date: new Date(),
-    mode: 'date',
-    datePickerModeAndroid: 'default',
+    mode: "date",
+    datePickerModeAndroid: "default",
     is24Hour: true,
     isVisible: false,
-    onHideAfterConfirm: () => {},
+    onHideAfterConfirm: () => {}
   };
 
   componentDidUpdate = prevProps => {
     if (!prevProps.isVisible && this.props.isVisible) {
-      if (this.props.mode === 'date' || this.props.mode === 'datetime') {
+      if (this.props.mode === "date" || this.props.mode === "datetime") {
         this._showDatePickerAndroid();
       } else {
         this._showTimePickerAndroid();
@@ -38,7 +37,7 @@ export default class CustomDatePickerAndroid extends PureComponent {
 
   componentDidMount = () => {
     if (this.props && this.props.isVisible) {
-      if (this.props.mode === 'date' || this.props.mode === 'datetime') {
+      if (this.props.mode === "date" || this.props.mode === "datetime") {
         this._showDatePickerAndroid();
       } else {
         this._showTimePickerAndroid();
@@ -52,26 +51,33 @@ export default class CustomDatePickerAndroid extends PureComponent {
         date: this.props.date,
         minDate: this.props.minimumDate,
         maxDate: this.props.maximumDate,
-        mode: this.props.datePickerModeAndroid,
+        mode: this.props.datePickerModeAndroid
       });
       if (action !== DatePickerAndroid.dismissedAction) {
         let date;
         if (this.props.date && !isNaN(this.props.date.getTime())) {
-          let hour = moment(this.props.date).hour();
-          let minute = moment(this.props.date).minute();
-          date = moment({ year, month, day, hour, minute }).toDate();
+          let hour = this.props.date.getHours();
+          let minute = this.props.date.getMinutes();
+          date = new Date(year, month, day, hour, minute);
         } else {
-          date = moment({ year, month, day }).toDate();
+          date = new Date(year, month, day);
         }
 
-        if (this.props.mode === 'datetime') {
+        if (this.props.mode === "datetime") {
           // Prepopulate and show time picker
-          const timeOptions = { is24Hour: this.props.is24Hour };
+          const timeOptions = {
+            is24Hour: this.props.is24Hour,
+            mode: this.props.datePickerModeAndroid
+          };
           if (this.props.date) {
-            timeOptions.hour = moment(this.props.date).hour();
-            timeOptions.minute = moment(this.props.date).minute();
+            timeOptions.hour = this.props.date.getHours();
+            timeOptions.minute = this.props.date.getMinutes();
           }
-          const { action: timeAction, hour, minute } = await TimePickerAndroid.open(timeOptions);
+          const {
+            action: timeAction,
+            hour,
+            minute
+          } = await TimePickerAndroid.open(timeOptions);
           if (timeAction !== TimePickerAndroid.dismissedAction) {
             const selectedDate = new Date(year, month, day, hour, minute);
             this.props.onConfirm(selectedDate, this.props.params);
@@ -87,27 +93,28 @@ export default class CustomDatePickerAndroid extends PureComponent {
         this.props.onCancel();
       }
     } catch ({ code, message }) {
-      console.warn('Cannot open date picker', message);
+      console.warn("Cannot open date picker", message);
     }
   };
 
   _showTimePickerAndroid = async () => {
     try {
       const { action, hour, minute } = await TimePickerAndroid.open({
-        hour: moment(this.props.date).hour(),
-        minute: moment(this.props.date).minute(),
+        hour: this.props.date.getHours(),
+        minute: this.props.date.getMinutes(),
         is24Hour: this.props.is24Hour,
+        mode: this.props.datePickerModeAndroid
       });
       if (action !== TimePickerAndroid.dismissedAction) {
         let date;
         if (this.props.date) {
           // This prevents losing the Date elements, see issue #71
-          const year = moment(this.props.date).year();
-          const month = moment(this.props.date).month();
-          const day = moment(this.props.date).date();
-          date = moment({ year, month, day, hour, minute }).toDate();
+          const year = this.props.date.getFullYear();
+          const month = this.props.date.getMonth();
+          const day = this.props.date.getDate();
+          date = new Date(year, month, day, hour, minute);
         } else {
-          date = moment({ hour, minute }).toDate();
+          date = new Date().setHours(hour).setMinutes(minute);
         }
         this.props.onConfirm(date, this.props.params);
         this.props.onHideAfterConfirm(date);
@@ -115,7 +122,7 @@ export default class CustomDatePickerAndroid extends PureComponent {
         this.props.onCancel();
       }
     } catch ({ code, message }) {
-      console.warn('Cannot open time picker', message);
+      console.warn("Cannot open time picker", message);
     }
   };
 
