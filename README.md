@@ -74,6 +74,7 @@ export default class DateTimePickerTester extends Component {
 | customConfirmButtonIOS | node |  | A custom component for the confirm button on iOS |
 | neverDisableConfirmIOS | bool | false | If true, do not disable the confirm button on any touch events; see [#82](https://github.com/mmazzarolo/react-native-modal-datetime-picker/issues/82) |
 | customTitleContainerIOS | node |  | A custom component for the title container on iOS |
+| hideTitleContainerIOS | bool | false | If true, hide the modal title container on iOS |
 | customDatePickerIOS | node |  | A custom component that will replace the default DatePicker on iOS [(Example)](https://github.com/mmazzarolo/react-native-modal-datetime-picker/pull/115#issue-279547697)|
 | datePickerContainerStyleIOS | style |  | The style of the container on iOS |
 | reactNativeModalPropsIOS | object |  | Additional props for [react-native-modal](https://github.com/react-native-community/react-native-modal) on iOS |
@@ -134,6 +135,16 @@ See issue [#29](https://github.com/mmazzarolo/react-native-modal-datetime-picker
 ### How to set 24 hours in iOS ?
 The `is24Hour` prop is only available on Android but you use a small hack for enabling it on iOS by setting the app's default timezone as `en_GB`.
 To do so, edit your `AppDelegate.m` file, and add `[[UIDatePicker appearance] setLocale:[[NSLocale alloc]initWithLocaleIdentifier:@"en_GB"]];` to `application didFinishLaunchingWithOptions`
+
+### How to set automatic locale in iOS
+Datepicker can adjust by itself locale ("fr_FR", "en_GB"...) depending user's device locale.
+Edit your `AppDelegate.m` file, and add:
+
+```objc
+  // Force DatePicker locale to current language (for: 24h or 12h format, full day names etc...)
+  NSString *currentLanguage = [[NSLocale preferredLanguages] firstObject];
+  [[UIDatePicker appearance] setLocale:[[NSLocale alloc]initWithLocaleIdentifier:currentLanguage]];
+```
 
 ## Notes
 Remember to always set the `isVisible` prop to `false` in both the `onConfirm` and `onCancel` props (like in the example above).

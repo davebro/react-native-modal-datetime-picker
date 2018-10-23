@@ -14,6 +14,7 @@ export default class CustomDatePickerIOS extends React.PureComponent {
     neverDisableConfirmIOS: PropTypes.bool,
     customConfirmButtonWhileInteractingIOS: PropTypes.node,
     customTitleContainerIOS: PropTypes.node,
+    hideTitleContainerIOS: PropTypes.bool,
     customDatePickerIOS: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
     contentContainerStyleIOS: PropTypes.any,
     datePickerContainerStyleIOS: PropTypes.any,
@@ -34,6 +35,7 @@ export default class CustomDatePickerIOS extends React.PureComponent {
 
   static defaultProps = {
     neverDisableConfirmIOS: false,
+    hideTitleContainerIOS: false,
     cancelTextIOS: "Cancel",
     confirmTextIOS: "Confirm",
     date: new Date(),
@@ -42,13 +44,13 @@ export default class CustomDatePickerIOS extends React.PureComponent {
     isVisible: false,
     onHideAfterConfirm: () => {},
     reactNativeModalPropsIOS: {},
-    onDateChange: () => {},
+    onDateChange: () => {}
   };
 
   state = {
     date: this.props.date,
     userIsInteractingWithPicker: false,
-    minuteInterval: 1
+    minuteInterval: this.props.minuteInterval || 1
   };
 
   componentWillReceiveProps(nextProps) {
@@ -62,11 +64,19 @@ export default class CustomDatePickerIOS extends React.PureComponent {
   _handleCancel = () => {
     this.confirmed = false;
     this.props.onCancel();
+    this._resetDate();
   };
 
   _handleConfirm = () => {
     this.confirmed = true;
     this.props.onConfirm(this.state.date, this.props.params);
+    this._resetDate();
+  };
+
+  _resetDate = () => {
+    this.setState({
+      date: new Date()
+    });
   };
 
   _handleOnModalHide = () => {
@@ -107,6 +117,7 @@ export default class CustomDatePickerIOS extends React.PureComponent {
       customDatePickerIOS,
       contentContainerStyleIOS,
       customTitleContainerIOS,
+      hideTitleContainerIOS,
       datePickerContainerStyleIOS,
       reactNativeModalPropsIOS,
       titleStyle,
@@ -167,7 +178,7 @@ export default class CustomDatePickerIOS extends React.PureComponent {
         {...reactNativeModalPropsIOS}
       >
         <View style={[styles.datepickerContainer, datePickerContainerStyleIOS]}>
-          {customTitleContainerIOS || titleContainer}
+          {!hideTitleContainerIOS && (customTitleContainerIOS || titleContainer)}
           <View
             onStartShouldSetResponderCapture={
               neverDisableConfirmIOS !== true ? this._handleUserTouchInit : null
